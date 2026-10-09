@@ -107,14 +107,14 @@ public class BookService {
 	private BookDocument mapToBookDocument(Book book) {
 		BookDocument bookDocument = new BookDocument();
 		bookDocument.setId(String.valueOf(book.getId()));
-				 bookDocument.setTitle(book.getTitle());
-		    bookDocument.setAuthor(book.getAuthor());
-		    bookDocument.setDescription(book.getDescription());
-		    bookDocument.setCategory(book.getCategory());
-		    bookDocument.setPublisher(book.getPublisher());
-		    bookDocument.setPublicationYear(book.getPublicationYear());
-		    bookDocument.setLanguage(book.getLanguage());
-		    bookDocument.setAvailable(book.getAvailable());
+		bookDocument.setTitle(book.getTitle());
+	    bookDocument.setAuthor(book.getAuthor());
+		bookDocument.setDescription(book.getDescription());
+		bookDocument.setCategory(book.getCategory());
+		bookDocument.setPublisher(book.getPublisher());
+		bookDocument.setPublicationYear(book.getPublicationYear());
+		bookDocument.setLanguage(book.getLanguage());
+		bookDocument.setAvailable(book.getAvailable());
 		return bookDocument;
 	}
 

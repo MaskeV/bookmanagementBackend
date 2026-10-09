@@ -26,7 +26,12 @@ public class BookDocument {
     private String publisher;
     @Field(type = FieldType.Integer)
     private Integer publicationYear;
-    @Field(type = FieldType.Keyword)
+    @Field(type = FieldType.Integer)
+    private Integer quantity;
+    
+ 
+
+	@Field(type = FieldType.Keyword)
     private String language;
     @Field(type = FieldType.Boolean)
     private Boolean available;
@@ -108,7 +113,14 @@ public class BookDocument {
 	public void setAvailable(Boolean available) {
 		this.available = available;
 	}
-    
 	
+	 public Integer getQuantity() {
+			return quantity;
+	 }
+
+	public void setQuantity(Integer quantity) {
+			this.quantity = quantity;
+	}
+    
 
 }

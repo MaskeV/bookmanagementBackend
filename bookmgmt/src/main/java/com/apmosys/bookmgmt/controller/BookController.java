@@ -6,7 +6,7 @@ import java.util.List;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
+
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -16,13 +16,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.apmosys.bookmgmt.document.BookDocument;
-import com.apmosys.bookmgmt.dto.AddBookDto;
 import com.apmosys.bookmgmt.entity.Book;
-import com.apmosys.bookmgmt.repository.BookRepository;
 import com.apmosys.bookmgmt.searchrepository.BookSearchRepository;
 import com.apmosys.bookmgmt.service.BookService;
 
-@CrossOrigin
+
 @RestController
 @RequestMapping("/api/books")
 public class BookController {
@@ -71,6 +69,7 @@ public class BookController {
 	
 	@GetMapping("/search")
 	public List<BookDocument> searchBook(@RequestParam String query) {
+		query = query.toLowerCase();
 		return  bookSearchRepository.findByTitleContainingOrAuthorContainingOrDescriptionContaining(query, query,query);
 	}
 }
