@@ -20,7 +20,7 @@ import com.apmosys.bookmgmt.entity.Book;
 import com.apmosys.bookmgmt.searchrepository.BookSearchRepository;
 import com.apmosys.bookmgmt.service.BookService;
 
-
+@CrossOrigin
 @RestController
 @RequestMapping("/api/books")
 public class BookController {
@@ -44,13 +44,13 @@ public class BookController {
 	public void addBook(@RequestBody Book book) {
 		
 		bookService.addBook(book);
-		
 	}
 	
 	@PostMapping("/addAll")
 	public void addAllBooks(@RequestBody List<Book> books) {
 		bookService.addAllBooks(books);
 	}
+	
 	@DeleteMapping("/{id}")
 	public void deleteBook(@PathVariable int id) {
 		bookService.deleteBook(id);
@@ -69,7 +69,7 @@ public class BookController {
 	
 	@GetMapping("/search")
 	public List<BookDocument> searchBook(@RequestParam String query) {
-		query = query.toLowerCase();
+		        query = query.toLowerCase();
 		return  bookSearchRepository.findByTitleContainingOrAuthorContainingOrDescriptionContaining(query, query,query);
 	}
 }
