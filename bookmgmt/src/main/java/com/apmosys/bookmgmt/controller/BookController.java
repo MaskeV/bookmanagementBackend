@@ -3,7 +3,7 @@ package com.apmosys.bookmgmt.controller;
 
 import java.util.List;
 
-import org.springframework.web.bind.annotation.CrossOrigin;
+
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 
@@ -17,22 +17,20 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.apmosys.bookmgmt.document.BookDocument;
 import com.apmosys.bookmgmt.entity.Book;
-import com.apmosys.bookmgmt.searchrepository.BookSearchRepository;
+
 import com.apmosys.bookmgmt.service.BookService;
 
-@CrossOrigin
 @RestController
 @RequestMapping("/api/books")
 public class BookController {
 	
 	private BookService bookService;
-	private BookSearchRepository bookSearchRepository;
 	
 	
-	public BookController(BookService bookService, BookSearchRepository bookSearchRepository) {
+
+	public BookController(BookService bookService) {
 		super();
 		this.bookService = bookService;
-		this.bookSearchRepository = bookSearchRepository;
 	}
 
 	@GetMapping("/{id}")
@@ -68,8 +66,13 @@ public class BookController {
 	}
 	
 	@GetMapping("/search")
-	public List<BookDocument> searchBook(@RequestParam String query) {
-		        query = query.toLowerCase();
-		return  bookSearchRepository.findByTitleContainingOrAuthorContainingOrDescriptionContaining(query, query,query);
+	public List<BookDocument> searchBook(@RequestParam(required = false) String query, 
+			@RequestParam(required = false) String category,
+			@RequestParam(required = false) String language,
+			@RequestParam(required = false)  String publisher,
+			@RequestParam(required = false) Boolean available) {
+		
+		
+		return bookService.searchBooks(query, category, language,publisher,available);
 	}
 }

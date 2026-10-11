@@ -29,7 +29,7 @@ public class CustomUserDetailsService implements UserDetailsService{
 		// TODO Auto-generated method stub
 		AppUser appUser = userRepository.findByEmail(email).orElse(null);
 	    return User
-	            .withUsername(appUser.getName())
+	            .withUsername(appUser.getEmail())
 	            .password(appUser.getPassword())
 	            .roles(appUser.getRole().name())  
 	            .build();

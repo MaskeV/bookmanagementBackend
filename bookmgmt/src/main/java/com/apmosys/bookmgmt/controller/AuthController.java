@@ -2,13 +2,13 @@ package com.apmosys.bookmgmt.controller;
 
 import java.util.Map;
 
-import javax.naming.AuthenticationException;
+
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.CrossOrigin;
+
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,7 +22,7 @@ import com.apmosys.bookmgmt.entity.Role;
 import com.apmosys.bookmgmt.repository.UserRepository;
 import com.apmosys.bookmgmt.service.JwtService;
 
-@CrossOrigin
+
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -54,8 +54,10 @@ public class AuthController {
 	    u.setPassword(encoder.encode(req.password()));
 	    u.setRole(Role.USER);
 	    repo.save(u);
-	    return ResponseEntity.ok(Map.of("message", "Registered successfully"));
-	}
+	    String token = jwtService.generateToken(u.getEmail(), u.getRole().name());
+	    return ResponseEntity.ok(new AuthResponse(token, u.getName(), u.getRole().name()));
+	    
+ 	}
 
 	@PostMapping("/login")
 	public ResponseEntity<?> login(@RequestBody LoginRequest req) {

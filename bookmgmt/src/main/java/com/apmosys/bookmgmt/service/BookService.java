@@ -5,6 +5,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.elasticsearch.client.elc.NativeQuery;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.stereotype.Service;
 
 import com.apmosys.bookmgmt.document.BookDocument;
@@ -15,14 +19,19 @@ import com.apmosys.bookmgmt.searchrepository.BookSearchRepository;
 @Service
 public class BookService {
 	
-	private BookRepository bookRepository;
-	private BookSearchRepository bookSearchRepository;
+	private final BookRepository bookRepository;
+	private final BookSearchRepository bookSearchRepository;
+	private final ElasticsearchOperations elasticsearchOperations;
 	
 	
-	public BookService(BookRepository bookRepository, BookSearchRepository bookSearchRepository) {
+
+
+	public BookService(BookRepository bookRepository, BookSearchRepository bookSearchRepository,
+			ElasticsearchOperations elasticsearchOperations) {
 		super();
 		this.bookRepository = bookRepository;
 		this.bookSearchRepository = bookSearchRepository;
+		this.elasticsearchOperations = elasticsearchOperations;
 	}
 
 	public Book findBookById(int id) {
@@ -125,6 +134,45 @@ public class BookService {
 			addBook(book);
 		}
 		
+	}
+
+	public List<BookDocument> searchBooks(String query, String category, String language, String publisher,
+			Boolean available) {
+		// TODO Auto-generated method stub
+		 NativeQuery nativeQuery = NativeQuery.builder()
+			        .withQuery(q -> q.bool(b -> {
+
+			            // 1) free-text search: every word must appear in title, author or description
+			            if (query != null && !query.isBlank()) {
+			                for (String word : query.trim().toLowerCase().split("\\s+")) {
+			                    String pattern = "*" + word + "*";
+			                    b.must(m -> m.bool(inner -> inner
+			                        .should(s -> s.wildcard(w -> w.field("title").value(pattern)))
+			                        .should(s -> s.wildcard(w -> w.field("author").value(pattern)))
+			                        .should(s -> s.wildcard(w -> w.field("description").value(pattern)))
+			                        .minimumShouldMatch("1")));
+			                }
+			            }
+
+			            // 2) exact filters on keyword fields (all combine with AND)
+			            if (category != null && !category.isBlank())
+			                b.filter(f -> f.term(t -> t.field("category").value(category.trim())));
+			            if (language != null && !language.isBlank())
+			                b.filter(f -> f.term(t -> t.field("language").value(language.trim())));
+			            if (publisher != null && !publisher.isBlank())
+			                b.filter(f -> f.term(t -> t.field("publisher").value(publisher.trim())));
+			            if (available != null)
+			                b.filter(f -> f.term(t -> t.field("available").value(available.booleanValue())));
+
+			            return b;
+			        }))
+			        .withPageable(PageRequest.of(0, 1000))   // ES returns only 10 hits by default
+			        .build();
+
+			    return elasticsearchOperations.search(nativeQuery, BookDocument.class)
+			            .stream()
+			            .map(SearchHit::getContent)
+			            .toList();
 	}
 	
 	
