@@ -2,6 +2,7 @@ package com.apmosys.bookmgmt.service;
 
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -154,7 +155,6 @@ public class BookService {
 			                }
 			            }
 
-			            // 2) exact filters on keyword fields (all combine with AND)
 			            if (category != null && !category.isBlank())
 			                b.filter(f -> f.term(t -> t.field("category").value(category.trim())));
 			            if (language != null && !language.isBlank())
@@ -174,6 +174,35 @@ public class BookService {
 			            .map(SearchHit::getContent)
 			            .toList();
 	}
+	
+	public List<Book> searchBooksFromDb(String query, String category, String language,
+            String publisher, Boolean available) {
+
+List<Book> books = bookRepository.findByFilters(
+blankToNull(category), blankToNull(language), blankToNull(publisher), available);
+
+if (query == null || query.isBlank()) {
+return books;
+}
+
+String[] words = query.trim().toLowerCase().split("\\s+");
+
+return books.stream()
+.filter(b -> {
+String text = (nz(b.getTitle()) + " " + nz(b.getAuthor()) + " " + nz(b.getDescription()))
+.toLowerCase();
+return Arrays.stream(words).allMatch(text::contains);   // every word must appear
+})
+.toList();
+}
+
+private String blankToNull(String s) {
+return (s == null || s.isBlank()) ? null : s.trim();
+}
+
+private String nz(String s) {
+return s == null ? "" : s;
+}
 	
 	
 }

@@ -66,13 +66,13 @@ public class BookController {
 	}
 	
 	@GetMapping("/search")
-	public List<BookDocument> searchBook(@RequestParam(required = false) String query, 
+	public List<Book> searchBook(@RequestParam(required = false) String query, 
 			@RequestParam(required = false) String category,
 			@RequestParam(required = false) String language,
 			@RequestParam(required = false)  String publisher,
 			@RequestParam(required = false) Boolean available) {
 		
 		
-		return bookService.searchBooks(query, category, language,publisher,available);
+		return bookService.searchBooksFromDb(query, category, language,publisher,available);
 	}
 }

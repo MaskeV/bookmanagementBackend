@@ -39,7 +39,7 @@ public class SecurityConfig {
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) {
 		 http
-         .csrf(csrf -> csrf.disable())                       // fine for stateless JWT APIs
+         .csrf(csrf -> csrf.disable())                     
          .cors(Customizer.withDefaults())
          .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
          .authorizeHttpRequests(auth -> auth
