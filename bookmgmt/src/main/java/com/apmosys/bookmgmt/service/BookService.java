@@ -48,12 +48,14 @@ public class BookService {
 		
 	}
 
-	public void addBook(Book book) {
+	public Book addBook(Book book) {
 		book.setCreatedAt(LocalDateTime.now());
 		
 	  Book savedBook =	bookRepository.save(book);
 	  
-	  bookSearchRepository.save(mapToBookDocument(savedBook));
+	 bookSearchRepository.save(mapToBookDocument(savedBook));
+	 
+	 return savedBook;
 
 	}
 	
@@ -128,12 +130,14 @@ public class BookService {
 		return bookDocument;
 	}
 
-	public void addAllBooks(List<Book> books) {
+	public List<Book> addAllBooks(List<Book> books) {
 		// TODO Auto-generated method stub
-		
+	
 		for(Book book:books) {
 			addBook(book);
 		}
+		
+		return books;
 		
 	}
 
@@ -191,7 +195,7 @@ return books.stream()
 .filter(b -> {
 String text = (nz(b.getTitle()) + " " + nz(b.getAuthor()) + " " + nz(b.getDescription()))
 .toLowerCase();
-return Arrays.stream(words).allMatch(text::contains);   // every word must appear
+return Arrays.stream(words).allMatch(text::contains);   
 })
 .toList();
 }

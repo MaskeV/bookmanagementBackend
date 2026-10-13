@@ -39,14 +39,14 @@ public class BookController {
 	}
 	
 	@PostMapping
-	public void addBook(@RequestBody Book book) {
+	public Book addBook(@RequestBody Book book) {
 		
-		bookService.addBook(book);
+	 return	bookService.addBook(book);
 	}
 	
 	@PostMapping("/addAll")
-	public void addAllBooks(@RequestBody List<Book> books) {
-		bookService.addAllBooks(books);
+	public List<Book> addAllBooks(@RequestBody List<Book> books) {
+	 return	bookService.addAllBooks(books);
 	}
 	
 	@DeleteMapping("/{id}")
