@@ -3,15 +3,23 @@ package com.apmosys.bookmgmt.service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.apmosys.bookmgmt.dto.AdminLoanResponse;
 import com.apmosys.bookmgmt.dto.LoanResponse;
+import com.apmosys.bookmgmt.dto.LoanStats;
+import com.apmosys.bookmgmt.dto.PageResponse;
 import com.apmosys.bookmgmt.entity.AppUser;
 import com.apmosys.bookmgmt.entity.Book;
 import com.apmosys.bookmgmt.entity.Loan;
+import com.apmosys.bookmgmt.entity.Role;
 import com.apmosys.bookmgmt.exception.LoanException;
 import com.apmosys.bookmgmt.repository.BookRepository;
 import com.apmosys.bookmgmt.repository.LoanRepository;
@@ -39,6 +47,8 @@ public class LoanService {
 	public LoanResponse borrow(String email, Integer bookId) {
 		AppUser user = userRepository.findByEmail(email)
 				.orElseThrow(() -> new LoanException(HttpStatus.UNAUTHORIZED, "User not found"));
+		if (user.getRole() == Role.ADMIN)
+		    throw new LoanException(HttpStatus.FORBIDDEN, "Admins cannot borrow books");
 		Book book = bookRepository.findByIdForUpdate(bookId)
 				.orElseThrow(() -> new LoanException(HttpStatus.NOT_FOUND, "Book not found"));
 
@@ -101,5 +111,42 @@ public class LoanService {
 		Book b = l.getBook();
 		return new LoanResponse(l.getId(), b.getId(), b.getTitle(), b.getAuthor(), b.getCategory(),
 				l.getBorrowedAt(), l.getDueDate(), l.getReturnedAt(), status);
+	}
+	
+	public PageResponse<AdminLoanResponse> allLoans(String status, String query, int page, int size) {
+	    String st = status == null ? null : status.trim().toUpperCase();
+	    if (st != null && !Set.of("BORROWED", "OVERDUE", "RETURNED").contains(st)) st = null;
+	    String q = (query == null || query.isBlank()) ? null : "%" + query.trim().toLowerCase() + "%";
+	    Pageable pageable = PageRequest.of(Math.max(page, 0), Math.min(Math.max(size, 1), 100),
+	            Sort.by(Sort.Direction.DESC, "borrowedAt").and(Sort.by("id")));
+	    return PageResponse.of(loanRepository.findForAdmin(st, q, LocalDate.now(), pageable)
+	            .map(this::toAdminResponse));
+	}
+
+	@Transactional(readOnly = true)
+	public LoanStats stats() {
+	    LocalDate today = LocalDate.now();
+	    return new LoanStats(loanRepository.count(), loanRepository.countByReturnedAtIsNull(),
+	            loanRepository.countByReturnedAtIsNullAndDueDateBefore(today),
+	            loanRepository.countByReturnedAtIsNotNull());
+	}
+
+	@Transactional(readOnly = true)
+	public PageResponse<LoanResponse> myLoans(String email, int page, int size) {
+	    Pageable pageable = PageRequest.of(Math.max(page, 0), Math.min(Math.max(size, 1), 100),
+	            Sort.by(Sort.Direction.DESC, "borrowedAt"));
+	    return PageResponse.of(loanRepository.findByUserEmail(email, pageable).map(this::toResponse));
+	}
+
+	private String statusOf(Loan l) {
+	    return l.getReturnedAt() != null ? "RETURNED"
+	            : l.getDueDate().isBefore(LocalDate.now()) ? "OVERDUE" : "BORROWED";
+	}
+
+	private AdminLoanResponse toAdminResponse(Loan l) {
+	    Book b = l.getBook();
+	    AppUser u = l.getUser();
+	    return new AdminLoanResponse(l.getId(), u.getId(), u.getName(), u.getEmail(), b.getId(),
+	            b.getTitle(), b.getAuthor(), l.getBorrowedAt(), l.getDueDate(), l.getReturnedAt(), statusOf(l));
 	}
 }
