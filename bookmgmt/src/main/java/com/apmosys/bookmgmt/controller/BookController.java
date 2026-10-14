@@ -65,14 +65,5 @@ public class BookController {
 		return bookService.getAllBooks();
 	}
 	
-	@GetMapping("/search")
-	public List<Book> searchBook(@RequestParam(required = false) String query, 
-			@RequestParam(required = false) String category,
-			@RequestParam(required = false) String language,
-			@RequestParam(required = false)  String publisher,
-			@RequestParam(required = false) Boolean available) {
-		
-		
-		return bookService.searchBooksFromDb(query, category, language,publisher,available);
-	}
+	
 }

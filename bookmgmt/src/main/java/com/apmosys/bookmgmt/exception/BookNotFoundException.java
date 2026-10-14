@@ -1,9 +1,8 @@
 package com.apmosys.bookmgmt.exception;
 
-public class BookNotFoundException extends Exception{
-	
-	public BookNotFoundException(String msg) {
-		super(msg);
-	}
+public class BookNotFoundException extends RuntimeException {
 
+    public BookNotFoundException(int id) {
+        super("Book not found with id: " + id);
+    }
 }

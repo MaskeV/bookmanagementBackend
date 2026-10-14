@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import com.apmosys.bookmgmt.document.BookDocument;
 import com.apmosys.bookmgmt.entity.Book;
+import com.apmosys.bookmgmt.exception.BookNotFoundException;
 import com.apmosys.bookmgmt.repository.BookRepository;
 import com.apmosys.bookmgmt.searchrepository.BookSearchRepository;
 
@@ -37,14 +38,8 @@ public class BookService {
 
 	public Book findBookById(int id) {
 		
-		Optional<Book> bookOptional = bookRepository.findById(id);
-		
-		if(bookOptional==null) {
-			System.out.println("Book not found");
-			return null;
-		}
-		
-		return bookOptional.get();
+		 return bookRepository.findById(id)
+		            .orElseThrow(() -> new BookNotFoundException(id));
 		
 	}
 
@@ -61,14 +56,9 @@ public class BookService {
 	
 	public void deleteBook(int id)  {
 		
-     Optional<Book> bookOptional = bookRepository.findById(id);
-		
-		if(bookOptional==null) {
-			System.out.println("Book not found");
-		    return;
-		}
-		
-	
+		if (!bookRepository.existsById(id)) {
+	        throw new BookNotFoundException(id);
+	    }
 		bookRepository.deleteById(id);
 		bookSearchRepository.deleteById(String.valueOf(id));
 	}
@@ -77,13 +67,9 @@ public class BookService {
 		
 		// TODO Auto-generated method stub
 		
-        Book book = this.findBookById(id);
+        Book book = findBookById(id);
 		
-		if(book==null) {
-			System.out.println("Book not found");
-		    return null;
-		}
-
+		
 		book.setTitle(updatedBook.getTitle());
 		book.setAuthor(updatedBook.getAuthor());
 		book.setDescription(updatedBook.getDescription());
