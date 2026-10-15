@@ -42,4 +42,10 @@ public class LoanController {
 	public List<LoanResponse> myLoans(Authentication authentication) {
 		return loanService.myLoans(authentication.getName());
 	}
+
+	// ADMIN only (enforced in SecurityConfig): every loan of every user
+	@GetMapping
+	public List<LoanResponse> allLoans() {
+		return loanService.allLoans();
+	}
 }

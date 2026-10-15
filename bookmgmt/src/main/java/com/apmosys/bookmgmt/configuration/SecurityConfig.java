@@ -45,11 +45,11 @@ public class SecurityConfig {
          .authorizeHttpRequests(auth -> auth
              .requestMatchers("/api/auth/**").permitAll()
              .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+             .requestMatchers("/api/admin/**").hasRole("ADMIN")
              .requestMatchers(HttpMethod.GET, "/api/books/**").hasAnyRole("USER", "ADMIN")
              .requestMatchers(HttpMethod.POST, "/api/books/**").hasRole("ADMIN")
              .requestMatchers(HttpMethod.PUT, "/api/books/**").hasRole("ADMIN")
              .requestMatchers(HttpMethod.DELETE, "/api/books/**").hasRole("ADMIN")
-             .requestMatchers("/api/admin/**").hasRole("ADMIN")
              .anyRequest().authenticated())
          .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
        return http.build();
